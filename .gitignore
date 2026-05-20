@@ -5,6 +5,7 @@ out
 build
 dist
 release
+desktop-runtime
 
 data/videos.db
 data/videos.db-*

@@ -1,4 +1,5 @@
 const { app, BrowserWindow, dialog, shell } = require("electron");
+const { spawn } = require("node:child_process");
 const http = require("node:http");
 const net = require("node:net");
 const path = require("node:path");
@@ -6,6 +7,7 @@ const path = require("node:path");
 const APP_NAME = "YouTube Benchmark Studio";
 let mainWindow = null;
 let nextServer = null;
+let serverProcess = null;
 
 function appDir() {
   if (app.isPackaged) return app.getAppPath();
@@ -46,18 +48,38 @@ function waitUntilReady(port, timeoutMs = 30000) {
 async function startNextServer() {
   const port = await freePort();
   const dir = appDir();
-  process.env.PORT = String(port);
-  process.env.HOSTNAME = "127.0.0.1";
-  process.env.YTB_DATA_DIR = path.join(app.getPath("userData"), "data");
+  const nodePath = app.isPackaged
+    ? path.join(
+        process.resourcesPath,
+        "desktop-runtime",
+        process.platform === "win32" ? "node.exe" : "node",
+      )
+    : process.env.npm_node_execpath || process.env.NODE || "node";
+  const serverScript = path.join(dir, "electron", "server.cjs");
+  const env = {
+    ...process.env,
+    PORT: String(port),
+    HOSTNAME: "127.0.0.1",
+    YTB_APP_DIR: dir,
+    YTB_DATA_DIR: path.join(app.getPath("userData"), "data"),
+  };
 
-  const next = require("next");
-  const nextApp = next({ dev: !app.isPackaged, dir, hostname: "127.0.0.1", port });
-  const handler = nextApp.getRequestHandler();
-  await nextApp.prepare();
-  nextServer = http.createServer((req, res) => handler(req, res));
-  await new Promise((resolve, reject) => {
-    nextServer.once("error", reject);
-    nextServer.listen(port, "127.0.0.1", resolve);
+  serverProcess = spawn(nodePath, [serverScript], {
+    cwd: dir,
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+  });
+  serverProcess.stdout.on("data", (chunk) => {
+    if (!app.isPackaged) process.stdout.write(`[server] ${chunk}`);
+  });
+  serverProcess.stderr.on("data", (chunk) => {
+    process.stderr.write(`[server] ${chunk}`);
+  });
+  serverProcess.once("exit", (code) => {
+    if (code && code !== 0) {
+      console.error(`Server process exited with code ${code}`);
+    }
   });
   await waitUntilReady(port);
   return port;
@@ -102,5 +124,6 @@ app.on("activate", () => {
 
 app.on("window-all-closed", () => {
   if (nextServer) nextServer.close();
+  if (serverProcess) serverProcess.kill();
   if (process.platform !== "darwin") app.quit();
 });

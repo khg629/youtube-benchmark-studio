@@ -1,6 +1,6 @@
 {
   "name": "youtube-benchmark",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Personal YouTube benchmarking and LLM analysis studio",
   "author": "YouTube Benchmark Studio",
   "private": true,
@@ -12,9 +12,11 @@
     "lint": "next lint",
     "desktop:dev": "electron electron/main.cjs",
     "rebuild:native": "npm rebuild better-sqlite3",
-    "dist": "npm run build && electron-builder --publish never && npm run rebuild:native",
-    "dist:mac": "npm run build && electron-builder --mac --publish never && npm run rebuild:native",
-    "dist:win": "npm run build && electron-builder --win --publish never && npm run rebuild:native"
+    "prepare:desktop-runtime": "node scripts/prepare-desktop-runtime.cjs",
+    "dist:dir": "npm run rebuild:native && npm run build && npm run prepare:desktop-runtime && electron-builder --dir --publish never",
+    "dist": "npm run rebuild:native && npm run build && npm run prepare:desktop-runtime && electron-builder --publish never",
+    "dist:mac": "npm run rebuild:native && npm run build && npm run prepare:desktop-runtime && electron-builder --mac --publish never",
+    "dist:win": "npm run rebuild:native && npm run build && npm run prepare:desktop-runtime && electron-builder --win --publish never"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
@@ -42,16 +44,25 @@
   "build": {
     "appId": "studio.youtube-benchmark.desktop",
     "productName": "YouTube Benchmark Studio",
+    "asar": false,
     "directories": {
       "output": "release"
     },
+    "npmRebuild": false,
+    "extraResources": [
+      {
+        "from": "desktop-runtime",
+        "to": "desktop-runtime"
+      }
+    ],
     "files": [
       "app/**/*",
       "components/**/*",
       "electron/**/*",
       "lib/**/*",
+      "scripts/**/*",
       ".next/**/*",
-      "next.config.ts",
+      "next.config.mjs",
       "next-env.d.ts",
       "package.json",
       "postcss.config.mjs",
@@ -59,6 +70,7 @@
       "node_modules/**/*",
       "!data/**/*",
       "!release/**/*",
+      "!desktop-runtime/**/*",
       "!.dev-server.log",
       "!tsconfig.tsbuildinfo"
     ],
