@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fafafa;
+  --surface: #ffffff;
+  --foreground: #15151c;
+  --card: #ffffff;
+  --card-hover: #f4f4f8;
+  --border: #e4e4ec;
+  --border-strong: #d1d1dc;
+  --muted: #6b6b78;
+  --muted-strong: #4a4a55;
+
+  --accent: #6a45e8;
+  --accent-hover: #5836d4;
+  --accent-strong: #4828b8;
+  --accent-soft: rgba(106, 69, 232, 0.1);
+  --accent-ring: rgba(106, 69, 232, 0.3);
+
+  --danger: #dc2626;
+  --warning: #d97706;
+  --success: #16a34a;
+  --info: #2563eb;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Segoe UI", "Noto Sans KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at top left, rgba(106, 69, 232, 0.06), transparent 45%),
+    radial-gradient(ellipse at bottom right, rgba(106, 69, 232, 0.04), transparent 50%),
+    var(--background);
+  background-attachment: fixed;
+}
+
+* {
+  border-color: var(--border);
+}
+
+button {
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.08s ease;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+input,
+select,
+textarea {
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* 스크롤바 (dark 스크롤 지원 브라우저만 적용됨) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b5b5c2;
+}
+
+/* 선택 색 */
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
+}
+
+/* 공용 유틸 클래스 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, #9b7aff 100%);
+  color: white;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px -4px var(--accent-soft);
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--accent-hover) 0%, #a688ff 100%);
+  box-shadow: 0 6px 20px -4px rgba(123, 87, 250, 0.5);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  background: var(--border);
+  box-shadow: none;
+}
+
+.card-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
